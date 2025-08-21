@@ -1,0 +1,248 @@
+CREATE TABLE authors(
+	author_id Varchr2(15) Primary Key,
+	author_name Varchar2(30) NOT NULL 
+);
+CREATE TABLE LoaiSach(
+	ma_loai_sach Varchar2(15) primary key,
+	ten_loai_sach Varchar2(30) NOT NULL
+);
+CREATE TABLE Book(
+	book_id Varchar2(15) Primary key.
+	book_title Varchar(30)   NOT NULL.
+	ma_loai_sach Varchar2(15),
+	FOREIGN KEY (ma_loai_sach) REFERENCES LoaiSach(ma_loai_sach)
+);
+CREATE TABLE Book_author(
+	book_id Varchar2(15),
+	author_id Varchar2(15),
+	Primary key (book_id, athor_id),
+	FOREIGN book_id REFERENCES Book(book_id),
+	FOREIGN author_id REFERENCES author(author_id)
+);
+
+-- viết hàm
+CREATE OR REPLACE FUNCTION tong_luong(dep NUMBER)
+RETURN NUMBER
+IS
+	tong NUMBER :=0;
+BEGIN
+	SELECT SUM(salary) INTO tong
+	FROM employees
+	where department=dep;
+	
+	return tong;
+END tong_luong;
+
+SELECT tong_luong(1) from dual;
+
+--vi du khac ve hàm
+CREATE OR REPLACE FUNCTION tong(n NUMBER)
+RETURN NUMBER
+IS
+	tong_so_nguyen NUMBER :=0;
+BEGIN
+	FOR I IN 1..n LOOP
+		tong_so_duong := tong_so_duong + i;
+	END LOOP;
+	RETURN tong_so_duong;
+END tong;
+
+SELECT tong(10) from dual;
+-- vi du 
+CREATE OR REPLACE FUNCTION snt(n NUMBER)
+RETURN BOOLEANNUMBER
+IS
+	KQ NUMBER;
+BEGIN
+	if n <= 1 THEN
+		RETURN FALSE;
+	END IF;
+	
+	FOR KQ IN 2..SQRT(n) LOOP
+		if MOD(n, KQ)=0 THEN
+		RETURN FALSE;
+		ENF IF;
+	END LOOP;
+	RETURN TRUE;
+END snt;
+
+SELECT snt(17) from dual;
+--thủ tục cập nhật thông tin lương
+
+SET SERVEROUTPUT ON;
+
+CREATE OR REPLACE PROCEDURE capnhat( 
+	p_id IN NUMBER,
+	p_luong IN NUMBER
+)
+IS
+BEGIN
+	UPDATE employeees
+	SET salary = p_luong;
+	WHERE employees_id = p_id;
+	COMMIT;
+	
+	dbms_output.put.line('thanh cong');
+	
+	EXCEPTION
+		WHEN NO_DATA_FOUND THEN
+			dbms_output.put.line('KO DL');
+		WHEN OTHER THEN
+			ROLLBACK;
+			dbms_output.put.line('!');
+END capnhat;
+
+BEGIN
+	capnhat(1,600);
+END;
+
+EXECUTE capnhat(1,600);
+
+--xoa nhan vien
+CREATE OR REPLACE PROCEDURE xoa_nv(p_id IN NUMBER)
+IS
+BEGIN
+	DELETE FROM employees
+	where employees_id = p_id;
+	COMMIT;
+	
+	EXCEPTION
+	WHEN NO_DATA_FOUND THEM
+dbms_output_put_line ('ko dl');
+	WHEN OTHERS THEN
+dbms_output_put_line ('ko BIET LOI');
+END xoa_nv;
+BEGIN
+	xoa_nv(1);
+END;
+EXECUTE xoa_nv(1);
+
+ôn tập lại
+--cách tạo bảng
+
+CREATE TABLE KHACHHANG(
+	makh varchar2 (15) PRIMARY KEY,
+	hotenkh varchar2 (30) NOT NULL,
+	sdt varchar2 (15) NOT NULL
+);
+
+CREATE TABLE SANPHAM(
+	masp varchar2 (15) PRIMARY KEY,
+	tensp varchar2 (30) NOT NULL,
+	gia float check(gia>0) not null,
+	soluongcosan int not null
+);
+
+CREATE TABLE DONHANG(
+	madh varchar2 (15) PRIMARY KEY,
+	makh varchar2(15),
+	ngaydat date,
+	tongsotien float check(tongsotien>0),
+	FOREIGN KEY makh REFERENCES KHACHHANG(makh)
+); 
+--THEM DL
+INSERT INTO DONHANG VALUES('DH001', );
+FOREIGN KEY MAKH REFERENCES KHACHHANG (MAKH)
+--cách tạo hàm
+CREATE OR REPLACE FUNCTION ten_ham (tham_so1 IN/OUR/IN OUR kieudl, tham_so1 IN/OUR/IN OUR kieudl)
+RETURN kieu_tra_ve
+IS
+	ten_bien:= kieudl;
+BEFIN
+	chuoi_lenh
+	
+	RETURN giatritrave;
+	
+	EXCEPTION
+		WHEN ten_ngoai_le THEN
+		khoi_lenh
+END;
+
+VD: viết 1 hàm trả về kq là năm của một ngày được truyền vào từ tham số
+
+CREATE OR REPLACE FUNCTION NAM( pday IN DATE)
+RETURN NUMBER
+IS
+BEGIN
+	RETURN EXTRACT (YEAR FROM pday);
+	EXCEPTION
+	WHEN OTHERS THEN RETURN 0;
+END;	
+
+vd: hàm bình phương
+CREATE OR REPLACE FUNCTION bingphuong(so IN NUMBER)
+RETURN NUMBER
+IS
+	ketqua NUMBER;
+BEGIN
+	ketqua:= so * so;
+	RETURN ketqua;
+END;
+--cach 1
+select binhphuong(5) from dual;
+--cach 2
+declare
+	resulr NUMBER;
+BEGIN	
+	result := binhphuong(5);
+	DBMS_OUTPUT_PUT_LINE('BINH PHUONG CUA 5 LA:' || result);
+END; 
+		
+--VD: hàm lấy tổng tiền lương của 1 phòng ban nào đó
+CREATE OR REPLACE FUNCTION Total(mapb IN NUMBER)
+RETURN NUMBER
+IS
+--1 bien de luu tong luong phong ban
+	tong NUMBER;
+BEGIN
+	tong:=0;
+	FOR emp_sal IN (SELECT sal FROM scott.emp where deptno=mapb and sal is not null)
+	loop
+	tong:=tong+emp_sal;
+	END LOOP;
+	RETURN tong;
+END Total;
+--
+SELCET Total(30) as tong_sal_pb FRON dual;
+DECLARE
+	result NUMBER;
+BEGIN
+	result:=Total(30);
+	DBMS_OUTPUT_PUT_LINE('PB 30 CO TONG LUON LA:' || result);
+END;
+
+--ham tra ve gia cua 1 xe nao do input bang ma
+CERATE OR REPLACE FUNCTION layxe(p_maxe IN VARCHAR)
+RETURN FLOAT
+IS
+	v_gia FLOAT;
+BEGIN
+	SELECT PhienBan.GianiemYet INTO v_gia
+	FROM PhienBan
+	INNER JOIN Xe ON PhienBan.MaPhienBan = Xe.MaPhienBan
+	WHERE MaXe = p_maxe;
+
+	RETURN v_gia;
+
+	EXCEPTION
+	WHEN NO_DATA_FOUND THEM
+	RETURN NULL;
+	WHEN OTHERS THEN
+	DBMS_OUTPUT_PUT_LINE('LOI KHAC!');
+END;
+
+SELECT layxe('X001') FROM dual;
+WHERE PhienBan.GiaNiemYet=(select max(GiaNiemYet) FROM PhienBan);
+
+
+
+
+
+
+
+
+
+
+
+
+
